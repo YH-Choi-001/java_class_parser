@@ -1,0 +1,203 @@
+/**
+ * 
+ *  Member.java - A class that holds a member (either field or method) in a .class file.
+ *  Copyright (C) 2024 YH Choi
+ *
+ *  This program is licensed under BSD 3-Clause License.
+ *  See LICENSE.txt for details.
+ * 
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ *  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+package personal.yhchoi.java.lib.java_class_parser.members;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
+import personal.yhchoi.java.lib.java_class_parser.attributes.Attribute;
+import personal.yhchoi.java.lib.java_class_parser.constants.Constant;
+import personal.yhchoi.java.lib.java_class_parser.constants.ConstantUTF8;
+
+/**
+ * A member (either field or method) in a .class file.
+ *
+ * @author Yui Hei Choi
+ * @version 2025.01.10
+ */
+public abstract class Member
+{
+    private static final int ACC_PUBLIC         = 0x0001;
+    private static final int ACC_PRIVATE        = 0x0002;
+    private static final int ACC_PROTECTED      = 0x0004;
+    private static final int ACC_STATIC         = 0x0008;
+    private static final int ACC_FINAL          = 0x0010;
+    private static final int ACC_SYNTHETIC      = 0x1000;
+    
+    // fields
+    private final int accessFlags;
+    private final int nameIndex;
+    private final int descriptorIndex;
+    private final Attribute[] attributes;
+    
+    private final ConstPoolRetriever consts;
+    
+    /**
+     * Constructor for objects of class Member
+     */
+    public Member(ConstPoolRetriever consts, int accessFlags, int nameIndex, int descriptorIndex, Attribute[] attributes)
+    {
+        this.consts = consts;
+        this.accessFlags = accessFlags;
+        this.nameIndex = nameIndex;
+        this.descriptorIndex = descriptorIndex;
+        this.attributes = attributes;
+    }
+    
+    
+    /**
+     * Creates a field or method from the input stream.
+     * 
+     * @param inStream the input stream to read the .class file
+     * @param consts the constant pool retriever
+     * @param isMethod true to create a method, false to create a field
+     * @return the newly created field or method, or null if operation failed
+     */
+    protected static final Member createMember(DataInputStream inStream, ConstPoolRetriever consts, boolean isMethod) throws IOException
+    {
+        final int accessFlags = inStream.readUnsignedShort();
+        final int nameIndex = inStream.readUnsignedShort();
+        final int descriptorIndex = inStream.readUnsignedShort();
+        final int attributesCount = inStream.readUnsignedShort();
+        final Attribute[] attributes = new Attribute[attributesCount];
+        for (int i = 0; i < attributesCount; i++) {
+            attributes[i] = Attribute.createAttribute(inStream, consts);
+        }
+        
+        if (isMethod) {
+            return new Method(consts, accessFlags, nameIndex, descriptorIndex, attributes);
+        } else {
+            return new Field(consts, accessFlags, nameIndex, descriptorIndex, attributes);
+        }
+    }
+    
+    /**
+     * Checks if an access flag is set or not.
+     * 
+     * @param flag the flag to be checked
+     * @return true if the specific access flag is set, false otherwise
+     */
+    protected final boolean checkAccessFlag(int flag)
+    {
+        return (accessFlags & flag) != 0;
+    }
+    
+    /**
+     * @return true if declared <code>public</code>
+     */
+    public final boolean isPublic()
+    {
+        return checkAccessFlag(ACC_PUBLIC);
+    }
+    
+    /**
+     * @return true if declared <code>private</code>
+     */
+    public final boolean isPrivate()
+    {
+        return checkAccessFlag(ACC_PRIVATE);
+    }
+    
+    /**
+     * @return true if declared <code>protected</code>
+     */
+    public final boolean isProtected()
+    {
+        return checkAccessFlag(ACC_PROTECTED);
+    }
+    
+    /**
+     * @return true if declared <code>static</code>
+     */
+    public final boolean isStatic()
+    {
+        return checkAccessFlag(ACC_STATIC);
+    }
+    
+    /**
+     * @return true if declared <code>final</code>
+     */
+    public final boolean isFinal()
+    {
+        return checkAccessFlag(ACC_FINAL);
+    }
+    
+    /**
+     * @return true if code is synthetic; generated by compiler and does not exist in source code
+     */
+    public final boolean isSynthetic()
+    {
+        return checkAccessFlag(ACC_SYNTHETIC);
+    }
+    
+    /**
+     * Gets a constant from the constant pool.
+     * 
+     * @param index the index of the constant
+     * @return the requested constant
+     */
+    private Constant getConstFromPool(int index)
+    {
+        return consts.getConstPool(index);
+    }
+    
+    /**
+     * Gets the name constant of this member.
+     * 
+     * @return the name constant of this member
+     */
+    public final String getName()
+    {
+        return ((ConstantUTF8)getConstFromPool(nameIndex)).getString();
+    }
+    
+    /**
+     * Gets the descriptor constant of this member.
+     * 
+     * @return the descriptor constant of this member
+     */
+    protected final String getDescriptor()
+    {
+        return ((ConstantUTF8)getConstFromPool(descriptorIndex)).getString();
+    }
+    
+    /**
+     * Gets the number of attributes held by this member.
+     * 
+     * @return the number of attributes held by this member
+     */
+    public final int getAttributesCount()
+    {
+        return attributes.length;
+    }
+    
+    /**
+     * Gets an attribute held by this member.
+     * 
+     * @param index the index of the attribute
+     * @return the requested attribute
+     */
+    public final Attribute getAttribute(int index)
+    {
+        return attributes[index];
+    }
+}
