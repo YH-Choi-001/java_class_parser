@@ -23,7 +23,6 @@ package personal.yhchoi.java.lib.java_class_parser.constants;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
 
@@ -47,7 +46,8 @@ public abstract class Constant
         STRING, INTEGER, FLOAT, LONG, DOUBLE,
         NAME_AND_TYPE, UTF8,
         METHOD_HANDLE, METHOD_TYPE,
-        INVOKE_DYNAMIC
+        DYNAMIC, INVOKE_DYNAMIC,
+        MODULE, PACKAGE
     }
     
     private static final HashMap<Integer, ConstPoolTag> constPoolTagsMap;
@@ -72,12 +72,14 @@ public abstract class Constant
         constPoolTagsMap.put(15, ConstPoolTag.METHOD_HANDLE);
         constPoolTagsMap.put(16, ConstPoolTag.METHOD_TYPE);
         
+        constPoolTagsMap.put(17, ConstPoolTag.DYNAMIC);
         constPoolTagsMap.put(18, ConstPoolTag.INVOKE_DYNAMIC);
+
+        constPoolTagsMap.put(19, ConstPoolTag.MODULE);
+        constPoolTagsMap.put(20, ConstPoolTag.PACKAGE);
     }
     
     private final ConstPoolRetriever consts;
-    
-    private static final HashMap<HashMap<String, int[]>, ArrayList<int[]>> m = new HashMap<>();
     
     /**
      * Constructor for objects of class Constant.
@@ -117,6 +119,9 @@ public abstract class Constant
     {
         final int tagNumber = inStream.readUnsignedByte();
         final ConstPoolTag tag = constPoolTagsMap.get(tagNumber);
+        if (tag == null) {
+            throw new IOException("Const Tag = " + tagNumber + " is not a valid tag.");
+        }
         switch (tag) {
             case CLASS:
                 return ConstantClass.createActualConst(inStream, consts);
@@ -144,8 +149,14 @@ public abstract class Constant
                 return ConstantMethodHandle.createActualConst(inStream, consts);
             case METHOD_TYPE:
                 return ConstantMethodType.createActualConst(inStream, consts);
+            case DYNAMIC:
+                return ConstantDynamic.createActualConst(inStream, consts);
             case INVOKE_DYNAMIC:
                 return ConstantInvokeDynamic.createActualConst(inStream, consts);
+            case MODULE:
+                return ConstantModule.createActualConst(inStream, consts);
+            case PACKAGE:
+                return ConstantPackage.createActualConst(inStream, consts);
             default:
                 return null;
         }

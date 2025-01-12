@@ -1,6 +1,6 @@
 /**
  * 
- *  ConstantUTF8.java - A class that holds a constant UTF-8 string in a .class file.
+ *  ConstantDynamic.java - A class that holds a constant dynamic in a .class file.
  *  Copyright (C) 2024 YH Choi
  *
  *  This program is licensed under BSD 3-Clause License.
@@ -26,43 +26,25 @@ import java.io.IOException;
 import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
 
 /**
- * Constant UTF-8 string in a .class file.
+ * Constant dynamic in a .class file.
  *
  * @author Yui Hei Choi
  * @version 2024.12.21
  */
-public class ConstantUTF8 extends Constant
+public class ConstantDynamic extends Constant
 {
     // fields
-    private String string;
+    private final int bootstrapMethodAttrIndex;
+    private final int nameAndTypeIndex;
 
     /**
-     * Constructor for objects of class ConstantUTF8.
+     * Constructor for objects of class ConstantDynamic.
      */
-    private ConstantUTF8(ConstPoolRetriever consts, byte[] bytes)
+    private ConstantDynamic(ConstPoolRetriever consts, int bootstrapMethodAttrIndex, int nameAndTypeIndex)
     {
         super(consts);
-        this.string = "";
-        for (int i = 0; i < bytes.length; i++) {
-            final byte x = bytes[i];
-            char toAppend;
-            if ((x & 0b11110000) == 0b11100000) {
-                // 0b1110xxxx : UTF-8 uses 3 bytes for this character
-                i++;
-                final byte y = bytes[i];
-                i++;
-                final byte z = bytes[i];
-                toAppend = (char)(((x & 0xf) << 12) | ((y & 0x3f) << 6) | (z & 0x3f));
-            } else if ((x & 0b11100000) == 0b11000000) {
-                // 0b110xxxxx : UTF-8 uses 2 bytes for this character
-                i++;
-                final byte y = bytes[i];
-                toAppend = (char)(((x & 0x1f) << 6) + (y & 0x3f));
-            } else {
-                toAppend = (char)x;
-            }
-            string += toAppend;
-        }
+        this.bootstrapMethodAttrIndex = bootstrapMethodAttrIndex;
+        this.nameAndTypeIndex = nameAndTypeIndex;
     }
     
     /**
@@ -74,14 +56,19 @@ public class ConstantUTF8 extends Constant
      */
     protected static final Constant createActualConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {
-        final int length = inStream.readUnsignedShort();
-        final byte[] bytes = new byte[length];
-        inStream.read(bytes);
-        return new ConstantUTF8(consts, bytes);
+        final int bootstrapMethodAttrIndex = inStream.readUnsignedShort();
+        final int nameAndTypeIndex = inStream.readUnsignedShort();
+        
+        return new ConstantDynamic(consts, bootstrapMethodAttrIndex, nameAndTypeIndex);
     }
     
-    public String getString()
+    public final int getBootstrapMethodAttrIndex()
     {
-        return string;
+        return bootstrapMethodAttrIndex;
+    }
+    
+    public final ConstantNameAndType getNameAndType()
+    {
+        return (ConstantNameAndType)getConstFromPool(nameAndTypeIndex);
     }
 }

@@ -76,6 +76,7 @@ public class JavaClassParser implements ConstPoolRetriever
     private static int ACC_SYNTHETIC  = 0x1000;
     private static int ACC_ANNOTATION = 0x2000;
     private static int ACC_ENUM       = 0x4000;
+    private static int ACC_MODULE     = 0x8000;
     
     /**
      * Constructor for objects of class JavaClassParser.
@@ -144,12 +145,19 @@ public class JavaClassParser implements ConstPoolRetriever
         majorVersion = inStream.readUnsignedShort();
         
         // parse const pool count
-        final int constPoolCount = inStream.readUnsignedShort() - 1;
+        final int constPoolCount = inStream.readUnsignedShort();
         
         // parse constant pool
-        constPool = new Constant[constPoolCount];
-        for (int i = 0; i < constPoolCount; i++) {
+        constPool = new Constant[constPoolCount - 1];
+        for (int i = 0; i < constPool.length; i++) {
             constPool[i] = Constant.createConst(inStream, this);
+            if (constPool[i] instanceof ConstantLong || constPool[i] instanceof ConstantDouble) {
+                // ConstantLong and ConstantDouble take up 2 entries in the constant pool.
+                // We need to skip an index
+                // The skipped index is valid but unusable.
+                // What a bad design.
+                i++;
+            }
         }
         
         // parse access flags
@@ -325,6 +333,14 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
+     * @return true if declared the file is a module but not a class nor interface
+     */
+    public final boolean isModule()
+    {
+        return checkAccessFlag(ACC_MODULE);
+    }
+    
+    /**
      * @return the name of this class
      */
     public final String getNameOfThisClass()
@@ -404,12 +420,14 @@ public class JavaClassParser implements ConstPoolRetriever
             writer.append("@interface ");
         } else if (isEnum()) {
             writer.append("enum ");
+        } else if (isModule()) {
+            writer.append("module ");
         } else {
             writer.append("class ");
         }
         
         // class name
-        final String thisClassName = getNameOfThisClass().replace('/', '.').replace('$', '.');
+        final String thisClassName = getNameOfThisClass().replace('/', '.');
         writer.append(thisClassName);
         
         // maybe extends a super class
@@ -422,9 +440,9 @@ public class JavaClassParser implements ConstPoolRetriever
         
         // maybe implements some interfaces
         if (getInterfacesCount() > 0) {
-            writer.append(" implements " + getInterface(0).getName());
+            writer.append(" implements " + getInterface(0).getName().replace('/', '.').replace('$', '.'));
             for (int i = 1; i < getInterfacesCount(); i++) {
-                writer.append(", " + getInterface(i).getName());
+                writer.append(", " + getInterface(i).getName().replace('/', '.').replace('$', '.'));
             }
         }
         
