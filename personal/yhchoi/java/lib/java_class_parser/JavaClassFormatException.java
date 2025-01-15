@@ -1,6 +1,6 @@
 /**
  * 
- *  ConstantPoolRetriever.java - An interface to allow retrieving constants from the constant pool in a .class file.
+ *  JavaClassParser.java - A class that retrieves data from a java .class file.
  *  Copyright (C) 2024 YH Choi
  *
  *  This program is licensed under BSD 3-Clause License.
@@ -21,22 +21,30 @@
 
 package personal.yhchoi.java.lib.java_class_parser;
 
-import personal.yhchoi.java.lib.java_class_parser.constants.Constant;
-
 /**
- * An interface to allow retrieving constants from the constant pool.
- *
+ * An exception of illegal java class file format.
+ * 
  * @author Yui Hei Choi
  * @version 2025.01.15
  */
-public interface ConstPoolRetriever
+public class JavaClassFormatException extends Exception
 {
     /**
-     * Gets a constant element from the constant pool.
-     * 
-     * @param index the index of the constant element to be obtained
-     * @return the constant element to be obtained
-     * @throws IndexOutOfBoundsException if <code>((index &lt; 1) || (index &gt;= constPool.length + 1))</code>
+     * Constructor for JavaClassFormatException exceptions.
      */
-    public Constant getConstPool(int index) throws IndexOutOfBoundsException;
+    public JavaClassFormatException()
+    {
+        super();
+    }
+
+    /**
+     * Constructor for JavaClassFormatException exceptions.
+     * 
+     * @param message the error message
+     */
+    public JavaClassFormatException(String message)
+    {
+        super(message);
+    }
+
 }

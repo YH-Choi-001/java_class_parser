@@ -29,7 +29,7 @@ import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
  * Constant name and type in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class ConstantNameAndType extends Constant
 {
@@ -39,6 +39,10 @@ public class ConstantNameAndType extends Constant
 
     /**
      * Constructor for objects of class ConstantClass.
+     * 
+     * @param consts the constant pool retriever
+     * @param nameIndex the index of name
+     * @param descriptorIndex the index of descriptor
      */
     private ConstantNameAndType(ConstPoolRetriever consts, int nameIndex, int descriptorIndex)
     {
@@ -53,6 +57,7 @@ public class ConstantNameAndType extends Constant
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
      * @return the newly create constant, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire constant
      */
     protected static final Constant createActualConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {
@@ -62,11 +67,21 @@ public class ConstantNameAndType extends Constant
         return new ConstantNameAndType(consts, nameIndex, descriptorIndex);
     }
     
+    /**
+     * Gets the name of the name and type.
+     * 
+     * @return the name
+     */
     public final String getName()
     {
         return ((ConstantUTF8)getConstFromPool(nameIndex)).getString();
     }
     
+    /**
+     * Gets the descriptor of the name and type.
+     * 
+     * @return the descriptor
+     */
     public final String getDescriptor()
     {
         return ((ConstantUTF8)getConstFromPool(descriptorIndex)).getString();

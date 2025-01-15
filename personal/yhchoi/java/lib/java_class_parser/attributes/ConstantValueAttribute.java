@@ -21,16 +21,15 @@
 
 package personal.yhchoi.java.lib.java_class_parser.attributes;
 
-import personal.yhchoi.java.lib.java_class_parser.constants.Constant;
-
 import java.io.DataInputStream;
 import java.io.IOException;
+import personal.yhchoi.java.lib.java_class_parser.constants.Constant;
 
 /**
  * A ConstantValue Attribute in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.11
+ * @version 2025.01.15
  */
 public class ConstantValueAttribute extends Attribute
 {
@@ -38,12 +37,15 @@ public class ConstantValueAttribute extends Attribute
     
     /**
      * Constructor for objects of class ConstantValueAttribute.
+     * 
+     * @param attr the original attribute
+     * @throws IOException if the input stream fails to read the entire attribute
      */
     private ConstantValueAttribute(Attribute attr) throws IOException
     {
         super(attr);
         
-        final DataInputStream infoInStream = getInfoInStream();
+        final DataInputStream infoInStream = createInfoInStream();
         constantValueIndex = infoInStream.readUnsignedShort();
     }
     
@@ -52,6 +54,7 @@ public class ConstantValueAttribute extends Attribute
      *
      * @param attr the general attribute
      * @return the new attribute built with this class, or null if attribute details don't match
+     * @throws IOException if the input stream fails to read the entire attribute
      */
     protected static final ConstantValueAttribute recoverAttribute(Attribute attr) throws IOException
     {

@@ -29,7 +29,7 @@ import personal.yhchoi.java.lib.java_class_parser.constants.ConstantUTF8;
  * A Signature Attribute in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.11
+ * @version 2025.01.15
  */
 public class SignatureAttribute extends Attribute
 {
@@ -37,12 +37,15 @@ public class SignatureAttribute extends Attribute
     
     /**
      * Constructor for objects of class SignatureAttribute.
+     * 
+     * @param attr the original attribute
+     * @throws IOException if the input stream fails to read the entire attribute
      */
     private SignatureAttribute(Attribute attr) throws IOException
     {
         super(attr);
         
-        final DataInputStream infoInStream = getInfoInStream();
+        final DataInputStream infoInStream = createInfoInStream();
         signatureIndex = infoInStream.readUnsignedShort();
     }
     
@@ -51,6 +54,7 @@ public class SignatureAttribute extends Attribute
      *
      * @param attr the general attribute
      * @return the new attribute built with this class, or null if attribute details don't match
+     * @throws IOException if the input stream fails to read the entire attribute
      */
     protected static final SignatureAttribute recoverAttribute(Attribute attr) throws IOException
     {

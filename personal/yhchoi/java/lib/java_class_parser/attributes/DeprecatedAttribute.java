@@ -21,24 +21,22 @@
 
 package personal.yhchoi.java.lib.java_class_parser.attributes;
 
-import java.io.IOException;
-
 /**
  * A Deprecated Attribute in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.11
+ * @version 2025.01.15
  */
 public class DeprecatedAttribute extends Attribute
 {
     /**
      * Constructor for objects of class DeprecatedAttribute.
+     * 
+     * @param attr the original attribute
      */
-    private DeprecatedAttribute(Attribute attr) throws IOException
+    private DeprecatedAttribute(Attribute attr)
     {
         super(attr);
-        
-        // final DataInputStream infoInStream = getInfoInStream();
     }
     
     /**
@@ -47,7 +45,7 @@ public class DeprecatedAttribute extends Attribute
      * @param attr the general attribute
      * @return the new attribute built with this class, or null if attribute details don't match
      */
-    protected static final DeprecatedAttribute recoverAttribute(Attribute attr) throws IOException
+    protected static final DeprecatedAttribute recoverAttribute(Attribute attr)
     {
         if (!"Deprecated".equals(attr.getName()) || attr.getInfoLength() != 0) {
             return null;

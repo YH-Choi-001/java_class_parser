@@ -37,13 +37,14 @@ import personal.yhchoi.java.lib.java_class_parser.constants.ConstantInteger;
 import personal.yhchoi.java.lib.java_class_parser.constants.ConstantLong;
 import personal.yhchoi.java.lib.java_class_parser.constants.ConstantString;
 import personal.yhchoi.java.lib.java_class_parser.members.Field;
+import personal.yhchoi.java.lib.java_class_parser.members.Member;
 import personal.yhchoi.java.lib.java_class_parser.members.Method;
 
 /**
  * A parser to retrieve data from java .class files.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class JavaClassParser implements ConstPoolRetriever
 {
@@ -119,8 +120,10 @@ public class JavaClassParser implements ConstPoolRetriever
     /**
      * Parses the .class file.
      * You may invoke this method on another thread and come back when parsing is finished.
+     * @throws IOException if I/O error occurs during parsing
+     * @throws JavaClassFormatException if an illegal java class format is detected
      */
-    public void parse() throws IOException
+    public void parse() throws IOException, JavaClassFormatException
     {
         if (file == null || !file.exists() || !file.isFile()) {
             return;
@@ -246,13 +249,14 @@ public class JavaClassParser implements ConstPoolRetriever
      * 
      * @param index the index of the constant element to be obtained
      * @return the constant element to be obtained
+     * @throws IndexOutOfBoundsException if <code>((index &lt; 1) || (index &gt;= constPool.length + 1))</code>
      */
     @Override
-    public final Constant getConstPool(int index)
+    public final Constant getConstPool(int index) throws IndexOutOfBoundsException
     {
         final int mappedIndex = index - 1; // Note that: The constant_pool table is indexed from 1 to constant_pool_count-1.
         if (mappedIndex < 0 || mappedIndex >= constPool.length) {
-            return null;
+            throw new IndexOutOfBoundsException();
         }
         return constPool[mappedIndex];
     }
@@ -269,7 +273,10 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if declared <code>public</code>; may be accessed from outside its package
+     * Checks if this class is <code>public</code>.
+     * If this is the case, then the class may be accessed from outside its package.
+     * 
+     * @return <code>true</code> if declared <code>public</code>; may be accessed from outside its package
      */
     public final boolean isPublic()
     {
@@ -277,7 +284,10 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if declared <code>final</code>; no subclasses allowed
+     * Checks if this class is <code>final</code>.
+     * If this is the case, then no subclasses are allowed.
+     * 
+     * @return <code>true</code> if declared <code>final</code>; no subclasses allowed
      */
     public final boolean isFinal()
     {
@@ -285,7 +295,10 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if treat superclass methods specially when invoked by the <code>invokespecial</code> instruction
+     * Checks if this class treats superclass methods specially
+     * when invoked by the <code>invokespecial</code> instruction.
+     * 
+     * @return <code>true</code> if treat superclass methods specially when invoked by the <code>invokespecial</code> instruction
      */
     public final boolean isSuper()
     {
@@ -293,7 +306,12 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if is an interface, not a class
+     * Checks if this file represents an <code>interface</code>.
+     * 
+     * @return <code>true</code> if is an <code>interface</code>, not a <code>class</code>
+     * @see #isAbstract()
+     * @see #isEnum()
+     * @see #isModule()
      */
     public final boolean isInterface()
     {
@@ -301,7 +319,11 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if declared <code>abstract</code>; must not be instantiated
+     * Checks if this class is <code>abstract</code>.
+     * Note that <code>interface</code> are always <code>abstract</code>.
+     * 
+     * @return <code>true</code> if declared <code>abstract</code>; must not be instantiated
+     * @see #isInterface()
      */
     public final boolean isAbstract()
     {
@@ -309,7 +331,10 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if declared synthetic; not present in the source code
+     * Checks if this class is <code>synthetic</code>.
+     * If this is the case, then it is not present in the original source code.
+     * 
+     * @return <code>true</code> if declared <code>synthetic</code>; not present in the source code
      */
     public final boolean isSynthetic()
     {
@@ -317,7 +342,9 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if declared as an annotation type
+     * Checks if this class is of annotation type.
+     * 
+     * @return <code>true</code> if declared as an annotation type
      */
     public final boolean isAnnotation()
     {
@@ -325,7 +352,11 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if declared as an <code>enum</code> type
+     * Checks if this file represents an <code>enum</code>.
+     * 
+     * @return <code>true</code> if declared as an <code>enum</code> type
+     * @see #isInterface()
+     * @see #isModule()
      */
     public final boolean isEnum()
     {
@@ -333,7 +364,11 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
-     * @return true if declared the file is a module but not a class nor interface
+     * Checks if this file represents a <code>module</code>.
+     * 
+     * @return <code>true</code> if declared the file as a module but not a class nor interface
+     * @see #isInterface()
+     * @see #isEnum()
      */
     public final boolean isModule()
     {
@@ -341,7 +376,10 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
+     * Gets the name of this class.
+     * 
      * @return the name of this class
+     * @see #getNameOfSuperClass()
      */
     public final String getNameOfThisClass()
     {
@@ -349,7 +387,10 @@ public class JavaClassParser implements ConstPoolRetriever
     }
     
     /**
+     * Gets the name of super class.
+     * 
      * @return the name of super class, or null if this class is java.lang.Object
+     * @see #getNameOfThisClass()
      */
     public final String getNameOfSuperClass()
     {
@@ -359,32 +400,74 @@ public class JavaClassParser implements ConstPoolRetriever
         return superClass.getName();
     }
     
+    /**
+     * Gets the number of interfaces in this class file.
+     * 
+     * @return the number of interfaces in this class file
+     * @see #getInterface(int)
+     */
     public final int getInterfacesCount()
     {
         return interfaces.length;
     }
     
+    /**
+     * Gets a specific interface in this class file.
+     * 
+     * @param index the index of the interface
+     * @return the requested interface
+     * @throws IndexOutOfBoundsException if <code>((index &lt; 0) || (index &gt;= getInterfacesCount()))</code>
+     * @see #getInterfacesCount()
+     */
     public final ConstantClass getInterface(int index)
     {
         return interfaces[index];
     }
     
+    /**
+     * Gets the number of fields in this class file.
+     * 
+     * @return the number of fields in this class file
+     * @see #getField(int)
+     */
     public final int getFieldsCount()
     {
         return fields.length;
     }
     
-    public final Field getField(int index)
+    /**
+     * Gets a specific field in this class file.
+     * 
+     * @param index the index of the field
+     * @return the requested field
+     * @throws IndexOutOfBoundsException if <code>((index &lt; 0) || (index &gt;= getFieldsCount()))</code>
+     * @see #getFieldsCount()
+     */
+    public final Field getField(int index) throws IndexOutOfBoundsException
     {
         return fields[index];
     }
     
+    /**
+     * Gets the number of methods in this class file.
+     * 
+     * @return the number of methods in this class file
+     * @see #getMethod(int)
+     */
     public final int getMethodsCount()
     {
         return methods.length;
     }
     
-    public final Method getMethod(int index)
+    /**
+     * Gets a specific method in this class file.
+     * 
+     * @param index the index of the method
+     * @return the requested method
+     * @throws IndexOutOfBoundsException if <code>((index &lt; 0) || (index &gt;= getMethodsCount()))</code>
+     * @see #getMethodsCount()
+     */
+    public final Method getMethod(int index) throws IndexOutOfBoundsException
     {
         return methods[index];
     }
@@ -496,7 +579,7 @@ public class JavaClassParser implements ConstPoolRetriever
                 for (int j = 0; j < field.getAttributesCount(); j++) {
                     final Attribute attr = field.getAttribute(j);
                     if (attr instanceof SignatureAttribute) {
-                        fieldType = Field.getCompoundTypeFromSignature(((SignatureAttribute)attr).getSignature());
+                        fieldType = Member.getCompoundTypeFromSignature(((SignatureAttribute)attr).getSignature());
                         break;
                     }
                 }
@@ -732,6 +815,11 @@ public class JavaClassParser implements ConstPoolRetriever
      */
     public interface BufferedOutput
     {
+        /**
+         * Appends a string of text to the buffered output.
+         * 
+         * @param text the text to be appended
+         */
         public void append(String text);
     }
 }

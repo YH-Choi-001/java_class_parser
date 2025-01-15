@@ -29,7 +29,7 @@ import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
  * Constant dynamic in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class ConstantDynamic extends Constant
 {
@@ -39,6 +39,10 @@ public class ConstantDynamic extends Constant
 
     /**
      * Constructor for objects of class ConstantDynamic.
+     * 
+     * @param consts the constant pool retriever
+     * @param bootstrapMethodAttrIndex the index of bootstrap method attr
+     * @param nameAndTypeIndex the index of name and type
      */
     private ConstantDynamic(ConstPoolRetriever consts, int bootstrapMethodAttrIndex, int nameAndTypeIndex)
     {
@@ -53,6 +57,7 @@ public class ConstantDynamic extends Constant
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
      * @return the newly create constant, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire constant
      */
     protected static final Constant createActualConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {
@@ -62,11 +67,21 @@ public class ConstantDynamic extends Constant
         return new ConstantDynamic(consts, bootstrapMethodAttrIndex, nameAndTypeIndex);
     }
     
+    /**
+     * Gets the index of the bootstrap method attr.
+     * 
+     * @return the index of the bootstrap method attr
+     */
     public final int getBootstrapMethodAttrIndex()
     {
         return bootstrapMethodAttrIndex;
     }
     
+    /**
+     * Gets the name and type of this constant dynamic.
+     * 
+     * @return the name and type of this constant dynamic
+     */
     public final ConstantNameAndType getNameAndType()
     {
         return (ConstantNameAndType)getConstFromPool(nameAndTypeIndex);

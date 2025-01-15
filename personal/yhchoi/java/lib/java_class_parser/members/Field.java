@@ -23,8 +23,6 @@ package personal.yhchoi.java.lib.java_class_parser.members;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
 import personal.yhchoi.java.lib.java_class_parser.attributes.Attribute;
 
@@ -32,7 +30,7 @@ import personal.yhchoi.java.lib.java_class_parser.attributes.Attribute;
  * A field in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class Field extends Member
 {
@@ -47,6 +45,12 @@ public class Field extends Member
     
     /**
      * Constructor for objects of class Field.
+     * 
+     * @param consts the constant pool retriever
+     * @param accessFlags the access flags of this field
+     * @param nameIndex the index of name of this field
+     * @param descriptorIndex the index of descriptor of this field
+     * @param attributes attributes of this field
      */
     protected Field(ConstPoolRetriever consts, int accessFlags, int nameIndex, int descriptorIndex, Attribute[] attributes)
     {
@@ -59,6 +63,7 @@ public class Field extends Member
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
      * @return the newly created field, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire field
      */
     public static final Field createField(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {
@@ -76,190 +81,10 @@ public class Field extends Member
     }
     
     /**
-     * Gets only 1 type from a descriptor.
+     * Checks if this field is <code>volatile</code>.
+     * If this is the case, then this field cannot be cached.
      * 
-     * @param descriptor the descriptor
-     * @return the type in the form <code>"java.util.Object"</code>, or null if not exactly 1 type is detected
-     */
-    public static final String getTypeFromDescriptor(String descriptor)
-    {
-        final List<String> types = getTypesFromDescriptor(descriptor);
-        if (types == null || types.size() != 1) {
-            return null;
-        }
-        return types.get(0);
-    }
-    
-    /**
-     * Gets the types from a descriptor.
-     * 
-     * @param descriptor the descriptor
-     * @return a list of the type in the form <code>"java.util.Object"</code>
-     */
-    public static final List<String> getTypesFromDescriptor(String descriptor)
-    {
-        ArrayList<String> types = new ArrayList<>();
-        while (!descriptor.isEmpty()) {
-            String type = "";
-            boolean sameType = false;
-            do {
-                sameType = false;
-                switch (descriptor.charAt(0)) {
-                    case '[':
-                        type += "[]";
-                        sameType = true;
-                        descriptor = descriptor.substring(1);
-                        break;
-                    case 'L':
-                        final int nextSemicolonIndex = descriptor.indexOf(";");
-                        type = descriptor.substring(1, nextSemicolonIndex) + type;
-                        descriptor = descriptor.substring(nextSemicolonIndex + 1);
-                        break;
-                    case 'B':
-                        type = "byte" + type;
-                        descriptor = descriptor.substring(1);
-                        break;
-                    case 'C':
-                        type = "char" + type;
-                        descriptor = descriptor.substring(1);
-                        break;
-                    case 'D':
-                        type = "double" + type;
-                        descriptor = descriptor.substring(1);
-                        break;
-                    case 'F':
-                        type = "float" + type;
-                        descriptor = descriptor.substring(1);
-                        break;
-                    case 'I':
-                        type = "int" + type;
-                        descriptor = descriptor.substring(1);
-                        break;
-                    case 'J':
-                        type = "long" + type;
-                        descriptor = descriptor.substring(1);
-                        break;
-                    case 'S':
-                        type = "short" + type;
-                        descriptor = descriptor.substring(1);
-                        break;
-                    case 'Z':
-                        type = "boolean" + type;
-                        descriptor = descriptor.substring(1);
-                        break;
-                }
-            } while (sameType);
-            // type = type.replace('/', '.');
-            // type = type.replace('$', '.');
-            types.add(type);
-        }
-        return types;
-    }
-    
-    /**
-     * Gets a compound type (a type with generic type) from a signature.
-     * 
-     * @param signature the signature
-     * @return a type in the form <code>"java.util.HashMap&lt;java.lang.String, java.util.Integer&gt;"</code>
-     */
-    public static final String getCompoundTypeFromSignature(String signature)
-    {
-        // HashMap<int[], int[]>
-        // Ljava/util/HashMap<[I[I>;
-        
-        // HashMap<Integer, Constant.ConstPoolTab>
-        // Ljava/util/HashMap<Ljava/lang/Integer;LConstant$ConstPoolTag;>;
-        
-        // HashMap<HashMap<String, Integer>, ArrayList<String>>
-        // Ljava/util/HashMap<Ljava/util/HashMap<Ljava/lang/String;Ljava/lang/Integer;>;Ljava/util/ArrayList<Ljava/lang/String;>;>;
-        
-        // HashMap<HashMap<String, int[]>, ArrayList<int[]>>
-        // Ljava/util/HashMap<Ljava/util/HashMap<Ljava/lang/String;[I>;Ljava/util/ArrayList<[I>;>;
-        // Ljava/util/HashMap< Ljava/util/HashMap<Ljava/lang/String;[I>; Ljava/util/ArrayList<[I>; >;
-        
-        String toReturn = "";
-        
-        boolean withinClass = false;
-        int arrayDepth = 0;
-        
-        char[] signatureArray = signature.toCharArray();
-        
-        for (int i = 0; i < signatureArray.length; i++) {
-            final char c = signatureArray[i];
-            boolean endOfOneType = false;
-            if (withinClass) {
-                switch (c) {
-                    case '<':
-                        withinClass = false;
-                        toReturn += c;
-                        break;
-                    case ';':
-                        withinClass = false;
-                        endOfOneType = true;
-                        break;
-                    default:
-                        toReturn += c;
-                }
-            } else {
-                switch (c) {
-                    case '[':
-                        arrayDepth++;
-                        break;
-                    case 'L':
-                        withinClass = true;
-                        break;
-                    case '>':
-                        withinClass = true;
-                        toReturn += c;
-                        break;
-                    case 'B':
-                        toReturn += "byte";
-                        endOfOneType = true;
-                        break;
-                    case 'C':
-                        toReturn += "char";
-                        endOfOneType = true;
-                        break;
-                    case 'D':
-                        toReturn += "double";
-                        endOfOneType = true;
-                        break;
-                    case 'F':
-                        toReturn += "float";
-                        endOfOneType = true;
-                        break;
-                    case 'I':
-                        toReturn += "int";
-                        endOfOneType = true;
-                        break;
-                    case 'J':
-                        toReturn += "long";
-                        endOfOneType = true;
-                        break;
-                    case 'S':
-                        toReturn += "short";
-                        endOfOneType = true;
-                        break;
-                    case 'Z':
-                        toReturn += "boolean";
-                        endOfOneType = true;
-                        break;
-                }
-            }
-            if (endOfOneType) {
-                for (int z = 0; z < arrayDepth; z++) toReturn += "[]";
-                arrayDepth = 0;
-                if ((i + 1) < signatureArray.length && signatureArray[i + 1] != '>') {
-                    toReturn += ", ";
-                }
-            }
-        }
-        
-        return toReturn;
-    }
-    
-    /**
-     * @return true if declared <code>volatile</code>; cannot be cached
+     * @return <code>true</code> if declared <code>volatile</code>; cannot be cached
      */
     public final boolean isVolatile()
     {
@@ -267,7 +92,10 @@ public class Field extends Member
     }
     
     /**
-     * @return true if declared <code>transient</code>; not written or read by a persistent object manager
+     * Checks if this field is <code>transient</code>.
+     * If this is the case, then this field is not written or read by a persistent object manager.
+     * 
+     * @return <code>true</code> if declared <code>transient</code>; not written or read by a persistent object manager
      */
     public final boolean isTransient()
     {
@@ -275,7 +103,9 @@ public class Field extends Member
     }
     
     /**
-     * @return true if declared as an element of an <code>enum</code>
+     * Checks if this field is an element of an <code>enum</code>.
+     * 
+     * @return <code>true</code> if declared as an element of an <code>enum</code>
      */
     public final boolean isEnum()
     {

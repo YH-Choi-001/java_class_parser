@@ -29,7 +29,7 @@ import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
  * Constant method type in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class ConstantMethodType extends Constant
 {
@@ -38,6 +38,9 @@ public class ConstantMethodType extends Constant
 
     /**
      * Constructor for objects of class ConstantMethodType.
+     * 
+     * @param consts the constant pool retriever
+     * @param descriptorIndex the index of the descriptor
      */
     private ConstantMethodType(ConstPoolRetriever consts, int descriptorIndex)
     {
@@ -51,6 +54,7 @@ public class ConstantMethodType extends Constant
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
      * @return the newly create constant, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire constant
      */
     protected static final ConstantMethodType createActualConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {
@@ -58,6 +62,11 @@ public class ConstantMethodType extends Constant
         return new ConstantMethodType(consts, descriptorIndex);
     }
     
+    /**
+     * Gets the descriptor of the method type.
+     * 
+     * @return the descriptor of the method type
+     */
     public final String getDescriptor()
     {
         return ((ConstantUTF8)getConstFromPool(descriptorIndex)).getString();

@@ -29,7 +29,7 @@ import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
  * Constant memberref in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public abstract class ConstantMemberref extends Constant
 {
@@ -37,10 +37,27 @@ public abstract class ConstantMemberref extends Constant
     private final int classIndex;
     private final int nameAndTypeIndex;
     
-    protected static enum MemberType {FIELD, METHOD, INTERFACE_METHOD}
+    /**
+     * The types of a member inside a class.
+     */
+    protected static enum MemberType
+    {
+        /** A field. */
+        FIELD,
+
+        /** A method. */
+        METHOD,
+
+        /** A method inside an interface. */
+        INTERFACE_METHOD
+    }
 
     /**
      * Constructor for objects of class ConstantFieldref.
+     * 
+     * @param consts constant pool retriever
+     * @param classIndex the index of class
+     * @param nameAndTypeIndex the index of name and type
      */
     protected ConstantMemberref(ConstPoolRetriever consts, int classIndex, int nameAndTypeIndex)
     {
@@ -54,7 +71,9 @@ public abstract class ConstantMemberref extends Constant
      * 
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
+     * @param type the type of the member to be created
      * @return the newly create constant, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire constant
      */
     protected static final Constant createActualConst(DataInputStream inStream, ConstPoolRetriever consts, MemberType type) throws IOException
     {
@@ -77,12 +96,19 @@ public abstract class ConstantMemberref extends Constant
         }
     }
     
+    /**
+     * Gets the wrapping class.
+     * 
+     * @return the wrapping class
+     */
     public final ConstantClass getThisClass()
     {
         return (ConstantClass)getConstFromPool(classIndex);
     }
 
     /**
+     * Gets the name of the wrapping class.
+     * 
      * @return the class name in format of <code>java.lang.Object</code>
      */
     public final String getClassName()
@@ -90,6 +116,11 @@ public abstract class ConstantMemberref extends Constant
         return getThisClass().getName();
     }
     
+    /**
+     * Gets the name and type of this member.
+     * 
+     * @return the name and type of this member
+     */
     public final ConstantNameAndType getNameAndType()
     {
         return (ConstantNameAndType)getConstFromPool(nameAndTypeIndex);

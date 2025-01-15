@@ -29,7 +29,7 @@ import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
  * Constant package in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class ConstantPackage extends Constant
 {
@@ -38,6 +38,9 @@ public class ConstantPackage extends Constant
 
     /**
      * Constructor for objects of class ConstantPackage.
+     * 
+     * @param consts the constant pool retriever
+     * @param nameIndex the index of the name
      */
     private ConstantPackage(ConstPoolRetriever consts, int nameIndex)
     {
@@ -51,6 +54,7 @@ public class ConstantPackage extends Constant
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
      * @return the newly create constant, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire constant
      */
     protected static final Constant createActualConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {
@@ -58,6 +62,11 @@ public class ConstantPackage extends Constant
         return new ConstantPackage(consts, nameIndex);
     }
     
+    /**
+     * Gets the name of the package.
+     * 
+     * @return the name of the package
+     */
     public final String getName()
     {
         return ((ConstantUTF8)getConstFromPool(nameIndex)).getString();

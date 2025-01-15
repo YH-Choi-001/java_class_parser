@@ -5,7 +5,7 @@
  * See LICENSE.txt for details. <br>
  * 
  * @author Yui Hei Choi
- * @version 0.0.1 Alpha
+ * @version 2025.01.15
  * 
  * @see personal.yhchoi.java.lib.java_class_parser.JavaClassParser
  */

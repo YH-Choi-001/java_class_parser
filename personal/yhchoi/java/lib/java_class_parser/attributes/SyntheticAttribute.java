@@ -21,24 +21,22 @@
 
 package personal.yhchoi.java.lib.java_class_parser.attributes;
 
-import java.io.IOException;
-
 /**
  * A Synthetic Attribute in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.11
+ * @version 2025.01.15
  */
 public class SyntheticAttribute extends Attribute
 {
     /**
      * Constructor for objects of class SyntheticAttribute.
+     * 
+     * @param attr the original attribute
      */
-    private SyntheticAttribute(Attribute attr) throws IOException
+    private SyntheticAttribute(Attribute attr)
     {
         super(attr);
-        
-        // final DataInputStream infoInStream = getInfoInStream();
     }
     
     /**
@@ -47,7 +45,7 @@ public class SyntheticAttribute extends Attribute
      * @param attr the general attribute
      * @return the new attribute built with this class, or null if attribute details don't match
      */
-    protected static final SyntheticAttribute recoverAttribute(Attribute attr) throws IOException
+    protected static final SyntheticAttribute recoverAttribute(Attribute attr)
     {
         if (!"Synthetic".equals(attr.getName()) || attr.getInfoLength() != 0) {
             return null;

@@ -25,12 +25,13 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
+import personal.yhchoi.java.lib.java_class_parser.JavaClassFormatException;
 
 /**
  * A constant in the constant pool of a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public abstract class Constant
 {
@@ -42,15 +43,64 @@ public abstract class Constant
      */
     protected enum ConstPoolTag
     {
-        CLASS, FIELDREF, METHODREF, INTERFACE_METHODREF,
-        STRING, INTEGER, FLOAT, LONG, DOUBLE,
-        NAME_AND_TYPE, UTF8,
-        METHOD_HANDLE, METHOD_TYPE,
-        DYNAMIC, INVOKE_DYNAMIC,
-        MODULE, PACKAGE
+        /** A tag for class. */
+        CLASS,
+
+        /** A tag for field ref. */
+        FIELDREF,
+
+        /** A tag for method ref. */
+        METHODREF,
+
+        /** A tag for interface-method ref. */
+        INTERFACE_METHODREF,
+
+
+        /** A tag for string. */
+        STRING,
+        
+        /** A tag for intger. */
+        INTEGER,
+        
+        /** A tag for float. */
+        FLOAT,
+        
+        /** A tag for long. */
+        LONG,
+        
+        /** A tag for double. */
+        DOUBLE,
+
+
+        /** A tag for name and type. */
+        NAME_AND_TYPE,
+
+        /** A tag for UTF-8. */
+        UTF8,
+
+
+        /** A tag for method handle. */
+        METHOD_HANDLE,
+        
+        /** A tag for method type. */
+        METHOD_TYPE,
+
+
+        /** A tag for dynamic. */
+        DYNAMIC,
+        
+        /** A tag for invoke dynamic. */
+        INVOKE_DYNAMIC,
+
+        
+        /** A tag for module. */
+        MODULE,
+        
+        /** A tag for package. */
+        PACKAGE
     }
     
-    private static final HashMap<Integer, ConstPoolTag> constPoolTagsMap;
+    private static final HashMap<Integer, ConstPoolTag> constPoolTagsMap;   // the map from integers to constant pool tags
     static
     {
         constPoolTagsMap = new HashMap<>();
@@ -83,6 +133,8 @@ public abstract class Constant
     
     /**
      * Constructor for objects of class Constant.
+     * 
+     * @param consts the constant pool retriever
      */
     protected Constant(ConstPoolRetriever consts)
     {
@@ -113,14 +165,17 @@ public abstract class Constant
      * Creates a constant from the input stream.
      * 
      * @param inStream the input stream to read the .class file
+     * @param consts the constant pool retriever
      * @return the newly created constant, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire constant
+     * @throws JavaClassFormatException if the format of the constant is invalid
      */
-    public static final Constant createConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
+    public static final Constant createConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException, JavaClassFormatException
     {
         final int tagNumber = inStream.readUnsignedByte();
         final ConstPoolTag tag = constPoolTagsMap.get(tagNumber);
         if (tag == null) {
-            throw new IOException("Const Tag = " + tagNumber + " is not a valid tag.");
+            throw new JavaClassFormatException("Const Tag = " + tagNumber + " is not a valid tag.");
         }
         switch (tag) {
             case CLASS:

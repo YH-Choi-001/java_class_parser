@@ -33,15 +33,13 @@ import personal.yhchoi.java.lib.java_class_parser.constants.ConstantUTF8;
  * An attribute in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class Attribute
 {
     // fields
     private final int nameIndex;
     private final byte[] info;
-    
-    private DataInputStream infoInStream;
     
     private final ConstPoolRetriever consts;
     
@@ -55,15 +53,73 @@ public class Attribute
      */
     protected enum AttrTag
     {
-        CONSTANT_VALUE, CODE, STACK_MAP_TABLE, EXCEPTIONS, INNER_CLASSES,
-        ENCLOSING_METHOD, SYNTHETIC, SIGNATURE, SOURCE_FILE, SOURCE_DEBUG_EXTENSION,
-        LINE_NUMBER_TABLE, LOCAL_VARIABLE_TABLE, LOCAL_VARIABLE_TYPE_TABLE,
-        DEPRECATED, RUNTIME_VISIBLE_ANNOTATIONS, RUNTIME_INVISIBLE_ANNOTATIONS,
-        RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS, RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS,
-        ANNOTATION_DEFAULT, BOOTSTRAP_METHODS
+        /** A tag for constant value. */
+        CONSTANT_VALUE,
+
+        /** A tag for code. */
+        CODE,
+
+        /** A tag for stack map table. */
+        STACK_MAP_TABLE,
+
+        /** A tag for exceptions. */
+        EXCEPTIONS,
+
+        /** A tag for inner classes. */
+        INNER_CLASSES,
+
+
+        /** A tag for enclosing method. */
+        ENCLOSING_METHOD,
+        
+        /** A tag for synthetic. */
+        SYNTHETIC,
+
+        /** A tag for signature. */
+        SIGNATURE,
+        
+        /** A tag for source file. */
+        SOURCE_FILE,
+        
+        /** A tag for source debug extension. */
+        SOURCE_DEBUG_EXTENSION,
+
+
+        /** A tag for line number table. */
+        LINE_NUMBER_TABLE,
+        
+        /** A tag for local variable table. */
+        LOCAL_VARIABLE_TABLE,
+        
+        /** A tag for local variable type table. */
+        LOCAL_VARIABLE_TYPE_TABLE,
+
+        
+        /** A tag for deprecated. */
+        DEPRECATED,
+        
+        /** A tag for runtime visible annotations. */
+        RUNTIME_VISIBLE_ANNOTATIONS,
+        
+        /** A tag for runtime invisible annotations. */
+        RUNTIME_INVISIBLE_ANNOTATIONS,
+
+
+        /** A tag for runtime visible parameter annotations. */
+        RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS,
+        
+        /** A tag for runtime invisible parameter annotations. */
+        RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS,
+
+
+        /** A tag for annotation default. */
+        ANNOTATION_DEFAULT,
+        
+        /** A tag for bootstrap methods. */
+        BOOTSTRAP_METHODS
     }
     
-    private static final HashMap<String, AttrTag> attrTagsMap;
+    private static final HashMap<String, AttrTag> attrTagsMap;  // the map from String to AttrTag
     static {
         attrTagsMap = new HashMap<>();
         
@@ -96,18 +152,25 @@ public class Attribute
     
     /**
      * Constructor for objects of class Attribute.
+     * 
+     * @param consts the constant pool retriever
+     * @param nameIndex the index of name of this attribute in the constant pool
+     * @param info bytes of information held by this attribute
      */
     private Attribute(ConstPoolRetriever consts, int nameIndex, byte[] info)
     {
         this.consts = consts;
         this.nameIndex = nameIndex;
         this.info = info;
-        this.infoInStream = null;
         // this.attrTag = attrTagsMap.get(getName());
     }
     
     /**
      * Constructor for objects of class Attribute.
+     * To be invoked when recovering an attribute to a subclass attribute
+     * that could provide more detailed information.
+     * 
+     * @param ref the original attribute
      */
     protected Attribute(Attribute ref)
     {
@@ -130,6 +193,7 @@ public class Attribute
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
      * @return the newly created attribute, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire attribute
      */
     public static final Attribute createAttribute(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {
@@ -167,6 +231,7 @@ public class Attribute
      *
      * @param attr the general attribute
      * @return the new attribute built with this class, or null if attribute details don't match
+     * @throws IOException if the input stream fails to read the entire attribute
      */
     protected static Attribute recoverAttribute(Attribute attr) throws IOException
     {
@@ -174,14 +239,13 @@ public class Attribute
     }
     
     /**
-     * Gets an info data input stream for subclasses to re-parse attributes.
+     * Creates a new info data input stream for subclasses to re-parse attributes.
+     * 
+     * @return a new <code>DataInputStream</code> for subclasses to read info[]
      */
-    protected final DataInputStream getInfoInStream()
+    protected final DataInputStream createInfoInStream()
     {
-        if (infoInStream == null) {
-            infoInStream = new DataInputStream(new ByteArrayInputStream(info));
-        }
-        return infoInStream;
+        return new DataInputStream(new ByteArrayInputStream(info));
     }
     
     /**
@@ -189,8 +253,9 @@ public class Attribute
      * 
      * @param index the index of the constant
      * @return the requested constant
+     * @throws IndexOutOfBoundsException if <code>index</code> is outside of valid range
      */
-    protected final Constant getConstFromPool(int index)
+    protected final Constant getConstFromPool(int index) throws IndexOutOfBoundsException
     {
         return consts.getConstPool(index);
     }

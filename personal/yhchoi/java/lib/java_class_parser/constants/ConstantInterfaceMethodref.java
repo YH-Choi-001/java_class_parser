@@ -29,12 +29,16 @@ import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
  * Constant interfacemethodref in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class ConstantInterfaceMethodref extends ConstantMemberref
 {
     /**
      * Constructor for objects of class ConstantInterfaceMethodref.
+     * 
+     * @param consts constant pool retriever
+     * @param classIndex the index of class
+     * @param nameAndTypeIndex the index of name and type
      */
     protected ConstantInterfaceMethodref(ConstPoolRetriever consts, int classIndex, int nameAndTypeIndex)
     {
@@ -47,6 +51,7 @@ public class ConstantInterfaceMethodref extends ConstantMemberref
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
      * @return the newly create constant, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire constant
      */
     protected static final Constant createActualConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {

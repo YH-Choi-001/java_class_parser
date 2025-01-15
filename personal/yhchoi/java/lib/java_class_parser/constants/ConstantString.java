@@ -29,7 +29,7 @@ import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
  * Constant string in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2024.12.21
+ * @version 2025.01.15
  */
 public class ConstantString extends Constant
 {
@@ -38,6 +38,9 @@ public class ConstantString extends Constant
 
     /**
      * Constructor for objects of class ConstantString.
+     * 
+     * @param consts the constant pool retriever
+     * @param stringIndex the index of string
      */
     private ConstantString(ConstPoolRetriever consts, int stringIndex)
     {
@@ -51,6 +54,7 @@ public class ConstantString extends Constant
      * @param inStream the input stream to read the .class file
      * @param consts the constant pool retriever
      * @return the newly create constant, or null if operation failed
+     * @throws IOException if the input stream fails to read the entire constant
      */
     protected static final Constant createActualConst(DataInputStream inStream, ConstPoolRetriever consts) throws IOException
     {
@@ -58,6 +62,11 @@ public class ConstantString extends Constant
         return new ConstantString(consts, stringIndex);
     }
     
+    /**
+     * Gets the string.
+     * 
+     * @return the string
+     */
     public final String getString()
     {
         return ((ConstantUTF8)getConstFromPool(stringIndex)).getString();
