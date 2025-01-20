@@ -1,0 +1,60 @@
+name: Java CI to create and upload release on pull request
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  build-number: ${GITHUB_RUN_NUMBER}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@latest
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: compile
+        run: javac |
+             -cp ./target/ |
+             -d ./compiled/ |
+             --release 21 |
+             ./target/personal/yhchoi/java/lib/java_class_parser/*.java |
+             ./target/personal/yhchoi/java/lib/java_class_parser/attributes/*.java |
+             ./target/personal/yhchoi/java/lib/java_class_parser/constants/*.java |
+             ./target/personal/yhchoi/java/lib/java_class_parser/members/*.java
+      - name: build_binary_jar
+        run: jar |
+             -c |
+             -f ./jar/java_class_parser_binary.jar |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class
+      - name: build_source_jar
+        run: jar |
+             -c |
+             -f ./jar/java_class_parser_source.jar |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/*.java |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.java |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.java |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class |
+             ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.java
+      - uses: actions/upload-artifact@latest
+        with:
+          name: Package
+          path: ./jar/java_class_parser_binary.jar
+          retention-days: 1
+      - uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB-TOKEN }}"
+          automatic_release_tag: "${{ github.run_number }}"
+          title: "Automated Build ${{ github.run_number }}"
+          prerelease: true
+          files: ./jar/*.jar
