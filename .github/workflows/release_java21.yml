@@ -38,5 +38,5 @@ jobs:
           title: "Version ${{ github.ref_name }}"
           prerelease: false
           files: |
-            LICENSE.txt
+            ${{ github.workspace }}/LICENSE.txt
             ./jar/*.jar
