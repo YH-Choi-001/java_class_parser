@@ -19,7 +19,7 @@ jobs:
           distribution: 'temurin'
       - name: compile
         run: javac \
-             -cp ./target/ \
+             --class-path ${{ github.workspace }} \
              -d ./compiled/ \
              --release 21 \
              ./target/personal/yhchoi/java/lib/java_class_parser/*.java \
