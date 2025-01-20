@@ -35,6 +35,8 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "${{ github.ref_name }}"
-          title: "Automated Build ${{ github.run_number }}"
+          title: "Version ${{ github.ref_name }}"
           prerelease: false
-          files: ./jar/*.jar
+          files: |
+            LICENSE.txt
+            ./jar/*.jar
