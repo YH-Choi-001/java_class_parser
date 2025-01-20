@@ -18,31 +18,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: compile
-        run: javac -cp ${{ github.workspace }} -d ./compiled/ \
-             --release 21 \
-             ./target/personal/yhchoi/java/lib/java_class_parser/*.java \
-             ./target/personal/yhchoi/java/lib/java_class_parser/attributes/*.java \
-             ./target/personal/yhchoi/java/lib/java_class_parser/constants/*.java \
-             ./target/personal/yhchoi/java/lib/java_class_parser/members/*.java
+        run: javac -cp ${{ github.workspace }} -d ./compiled/ --release 21 ./target/personal/yhchoi/java/lib/java_class_parser/*.java ./target/personal/yhchoi/java/lib/java_class_parser/attributes/*.java ./target/personal/yhchoi/java/lib/java_class_parser/constants/*.java ./target/personal/yhchoi/java/lib/java_class_parser/members/*.java
       - name: build_binary_jar
-        run: jar -c \
-             -f ./jar/java_class_parser_${{ env.build-number }}_binary.jar \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class
+        run: jar -c -f ./jar/java_class_parser_${{ env.build-number }}_binary.jar ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class
       - name: build_source_jar
-        run: jar |
-             -c \
-             -f ./jar/java_class_parser_${{ env.build-number }}_source.jar \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/*.java \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.java \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.java \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class \
-             ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.java
+        run: jar -c -f ./jar/java_class_parser_${{ env.build-number }}_source.jar ./compiled/personal/yhchoi/java/lib/java_class_parser/*.java ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.java ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.java ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.java
       - uses: actions/upload-artifact@v3
         with:
           name: Package
