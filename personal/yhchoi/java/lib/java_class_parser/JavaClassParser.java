@@ -722,45 +722,28 @@ public class JavaClassParser implements ConstPoolRetriever
         }
         for (int i = 0; i < input.length(); i++) {
             final char c = input.charAt(i);
-            switch (c) {
-                case '\\':
-                    toReturn += "\\\\";
-                    break;
-                case '\'':
-                    toReturn += "\\\'";
-                    break;
-                case '\"':
-                    toReturn += "\\\"";
-                    break;
-                case '\b':
-                    toReturn += "\\b";
-                    break;
-                case '\f':
-                    toReturn += "\\f";
-                    break;
-                case '\n':
-                    toReturn += "\\n";
-                    break;
-                case '\r':
-                    toReturn += "\\r";
-                    break;
-                case '\s':
-                    toReturn += "\\s";
-                    break;
-                case '\t':
-                    toReturn += "\\t";
-                    break;
-                default:
-                    if (c >= 0x20 && c <= 0x7e) {
-                        toReturn += c;
-                    } else {
-                        String strRep = Integer.toString((int)c, 16);
-                        while (strRep.length() < 4) {
-                            strRep = "0" + strRep;
-                        }
-                        toReturn += "\\u" + strRep;
-                    }
-                    break;
+            if (c == '\\' || c == '\'' || c == '\"') {
+                toReturn += "\\" + c;
+            } else if (c == '\b') {
+                toReturn += "\\b";
+            } else if (c == '\f') {
+                toReturn += "\\f";
+            } else if (c == '\n') {
+                toReturn += "\\n";
+            } else if (c == '\r') {
+                toReturn += "\\r";
+            } else if (c == '\s') {
+                toReturn += "\\s";
+            } else if (c == '\t') {
+                toReturn += "\\t";
+            } else if (c >= 0x20 && c <= 0x7e) {
+                toReturn += c;
+            } else {
+                String strRep = Integer.toString((int)c, 16);
+                while (strRep.length() < 4) {
+                    strRep = "0" + strRep;
+                }
+                toReturn += "\\u" + strRep;
             }
         }
         toReturn += "\"";
