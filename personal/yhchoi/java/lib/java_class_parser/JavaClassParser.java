@@ -1,7 +1,7 @@
 /**
  * 
  *  JavaClassParser.java - A class that retrieves data from a java .class file.
- *  Copyright (C) 2024 YH Choi
+ *  Copyright (C) 2024 - 2025 YH Choi
  *
  *  This program is licensed under BSD 3-Clause License.
  *  See LICENSE.txt for details.
@@ -44,7 +44,7 @@ import personal.yhchoi.java.lib.java_class_parser.members.Method;
  * A parser to retrieve data from java .class files.
  *
  * @author Yui Hei Choi
- * @version 2025.01.15
+ * @version 2025.01.25
  */
 public class JavaClassParser implements ConstPoolRetriever
 {
@@ -69,15 +69,15 @@ public class JavaClassParser implements ConstPoolRetriever
     
     private Attribute[] attributes;
     
-    private static int ACC_PUBLIC     = 0x0001;
-    private static int ACC_FINAL      = 0x0010;
-    private static int ACC_SUPER      = 0x0020;
-    private static int ACC_INTERFACE  = 0x0200;
-    private static int ACC_ABSTRACT   = 0x0400;
-    private static int ACC_SYNTHETIC  = 0x1000;
-    private static int ACC_ANNOTATION = 0x2000;
-    private static int ACC_ENUM       = 0x4000;
-    private static int ACC_MODULE     = 0x8000;
+    private static final int ACC_PUBLIC     = 0x0001;
+    private static final int ACC_FINAL      = 0x0010;
+    private static final int ACC_SUPER      = 0x0020;
+    private static final int ACC_INTERFACE  = 0x0200;
+    private static final int ACC_ABSTRACT   = 0x0400;
+    private static final int ACC_SYNTHETIC  = 0x1000;
+    private static final int ACC_ANNOTATION = 0x2000;
+    private static final int ACC_ENUM       = 0x4000;
+    private static final int ACC_MODULE     = 0x8000;
     
     /**
      * Constructor for objects of class JavaClassParser.
