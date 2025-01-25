@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java_vers }}
+          java-version: '${{ matrix.java_vers }}'
           distribution: 'temurin'
       - name: compile
         run: javac -cp ${{ github.workspace }} -d ./compiled/ ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/attributes/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/constants/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/members/*.java
