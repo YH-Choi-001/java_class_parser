@@ -732,8 +732,6 @@ public class JavaClassParser implements ConstPoolRetriever
                 toReturn += "\\n";
             } else if (c == '\r') {
                 toReturn += "\\r";
-            } else if (c == '\s') {
-                toReturn += "\\s";
             } else if (c == '\t') {
                 toReturn += "\\t";
             } else if (c >= 0x20 && c <= 0x7e) {
