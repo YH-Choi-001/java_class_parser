@@ -13,19 +13,22 @@ env:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        java_vers: [8, 17, 21]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: ${{ matrix.java_vers }}
           distribution: 'temurin'
       - name: compile
-        run: javac -cp ${{ github.workspace }} -d ./compiled/ --release 21 ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/attributes/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/constants/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/members/*.java
+        run: javac -cp ${{ github.workspace }} -d ./compiled/ --release ${{ matrix.java_vers }} ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/attributes/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/constants/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/members/*.java
       - name: build_binary_jar
-        run: jar -c -f ./jar/java_class_parser_${{ github.ref_name }}_java21_bin.jar ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class
+        run: jar -c -f ./jar/java_class_parser_${{ github.ref_name }}_java${{ matrix.java_vers }}_bin.jar ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class
       - name: build_source_jar
-        run: jar -c -f ./jar/java_class_parser_${{ github.ref_name }}_java21_src.jar ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/attributes/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/constants/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/members/*.java
+        run: jar -c -f ./jar/java_class_parser_${{ github.ref_name }}_java${{ matrix.java_vers }}_src.jar ./compiled/personal/yhchoi/java/lib/java_class_parser/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/attributes/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/constants/*.class ./compiled/personal/yhchoi/java/lib/java_class_parser/members/*.class ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/attributes/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/constants/*.java ${{ github.workspace }}/personal/yhchoi/java/lib/java_class_parser/members/*.java
       - uses: actions/upload-artifact@v3
         with:
           name: Package
