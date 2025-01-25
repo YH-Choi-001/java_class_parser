@@ -24,14 +24,20 @@ jobs:
         with:
           java-version: '${{ matrix.java_vers }}'
           distribution: 'temurin'
-      - name: make dir
+      - name: make compiled directory
         run: mkdir compiled_${{ matrix.java_vers }}
+      - name: collect all java files
+        run: find ${{ github.workspace }} -type f -name "*.java" > sources.txt
       - name: compile
-        run: javac -cp ${{ github.workspace }} --release ${{ matrix.java_vers }} -d ./compiled_${{ matrix.java_vers }}/ ${{ github.workspace }}/**/*.java
+        run: javac -cp ${{ github.workspace }} --release ${{ matrix.java_vers }} -d ./compiled_${{ matrix.java_vers }}/ @sources.txt
+      - name: collect all class files
+        run: find ./compiled_${{ matrix.java_vers }} -type f -name "*.class" > binaries.txt
       - name: build_binary_jar
-        run: jar -c -f ./jar/java_class_parser_${{ github.ref_name }}_java${{ matrix.java_vers }}_bin.jar ./compiled_${{ matrix.java_vers }}/**/*.class
+        run: jar -c -f ./jar/java_class_parser_${{ github.ref_name }}_java${{ matrix.java_vers }}_bin.jar @binaries.txt
+      - name: collect all java and class files
+        run: cat sources.txt binaries.txt > sources_and_binaries.txt
       - name: build_source_jar
-        run: jar -c -f ./jar/java_class_parser_${{ github.ref_name }}_java${{ matrix.java_vers }}_src.jar ./compiled_${{ matrix.java_vers }}/**/*.class ${{ github.workspace }}/**/*.java
+        run: jar -c -f ./jar/java_class_parser_${{ github.ref_name }}_java${{ matrix.java_vers }}_src.jar @sources_and_binaries.txt
       - uses: actions/upload-artifact@v3
         with:
           name: Package
