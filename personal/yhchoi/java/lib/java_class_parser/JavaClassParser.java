@@ -44,7 +44,7 @@ import personal.yhchoi.java.lib.java_class_parser.members.Method;
  * A parser to retrieve data from java .class files.
  *
  * @author Yui Hei Choi
- * @version 2025.01.25
+ * @version 2025.01.30
  */
 public class JavaClassParser implements ConstPoolRetriever
 {
@@ -128,90 +128,90 @@ public class JavaClassParser implements ConstPoolRetriever
         if (file == null || !file.exists() || !file.isFile()) {
             return;
         }
-        final DataInputStream inStream = new DataInputStream(
-            new BufferedInputStream(new FileInputStream(file)));
-        
         // parse magic number
         // check if class file is valid
-        final int magicNumber = inStream.readInt();
-        isClassFileValid = (magicNumber == (int)0xCAFEBABE);
-        
-        if (!isClassFileValid) {
-            inStream.close();
-            return;
-        }
-        
-        // parse minor version
-        minorVersion = inStream.readUnsignedShort();
-        
-        // parse major version
-        majorVersion = inStream.readUnsignedShort();
-        
-        // parse const pool count
-        final int constPoolCount = inStream.readUnsignedShort();
-        
-        // parse constant pool
-        constPool = new Constant[constPoolCount - 1];
-        for (int i = 0; i < constPool.length; i++) {
-            constPool[i] = Constant.createConst(inStream, this);
-            if (constPool[i] instanceof ConstantLong || constPool[i] instanceof ConstantDouble) {
-                // ConstantLong and ConstantDouble take up 2 entries in the constant pool.
-                // We need to skip an index
-                // The skipped index is valid but unusable.
-                // What a bad design.
-                i++;
+        try (DataInputStream inStream = new DataInputStream(
+                new BufferedInputStream(new FileInputStream(file)))) {
+            // parse magic number
+            // check if class file is valid
+            final int magicNumber = inStream.readInt();
+            isClassFileValid = (magicNumber == (int)0xCAFEBABE);
+            
+            if (!isClassFileValid) {
+                inStream.close();
+                return;
+            }
+            
+            // parse minor version
+            minorVersion = inStream.readUnsignedShort();
+            
+            // parse major version
+            majorVersion = inStream.readUnsignedShort();
+            
+            // parse const pool count
+            final int constPoolCount = inStream.readUnsignedShort();
+            
+            // parse constant pool
+            constPool = new Constant[constPoolCount - 1];
+            for (int i = 0; i < constPool.length; i++) {
+                constPool[i] = Constant.createConst(inStream, this);
+                if (constPool[i] instanceof ConstantLong || constPool[i] instanceof ConstantDouble) {
+                    // ConstantLong and ConstantDouble take up 2 entries in the constant pool.
+                    // We need to skip an index
+                    // The skipped index is valid but unusable.
+                    // What a bad design.
+                    i++;
+                }
+            }
+            
+            // parse access flags
+            accessFlags = inStream.readUnsignedShort();
+            
+            // parse this class index
+            final int thisClassIndex = inStream.readUnsignedShort();
+            thisClass = (ConstantClass)getConstPool(thisClassIndex);
+            
+            // parse super class index
+            final int superClassIndex = inStream.readUnsignedShort();
+            superClass = ((superClassIndex != 0) ? (ConstantClass)getConstPool(superClassIndex) : null);
+            
+            // parse interfaces count
+            final int interfacesCount = inStream.readUnsignedShort();
+            
+            // parse interfaces
+            interfaces = new ConstantClass[interfacesCount];
+            for (int i = 0; i < interfacesCount; i++) {
+                final int interfaceIndex = inStream.readUnsignedShort();
+                interfaces[i] = (ConstantClass)getConstPool(interfaceIndex);
+            }
+            
+            // parse fields count
+            final int fieldsCount = inStream.readUnsignedShort();
+            
+            // parse fields
+            fields = new Field[fieldsCount];
+            for (int i = 0; i < fieldsCount; i++) {
+                fields[i] = Field.createField(inStream, this);
+            }
+            
+            // parse methods count
+            final int methodsCount = inStream.readUnsignedShort();
+            
+            // parse methods
+            methods = new Method[methodsCount];
+            for (int i = 0; i < methodsCount; i++) {
+                methods[i] = Method.createMethod(inStream, this);
+            }
+            
+            // parse attributes count
+            final int attributesCount = inStream.readUnsignedShort();
+            
+            // parse attributes
+            attributes = new Attribute[attributesCount];
+            for (int i = 0; i < attributesCount; i++) {
+                attributes[i] = Attribute.createAttribute(inStream, this);
             }
         }
-        
-        // parse access flags
-        accessFlags = inStream.readUnsignedShort();
-        
-        // parse this class index
-        final int thisClassIndex = inStream.readUnsignedShort();
-        thisClass = (ConstantClass)getConstPool(thisClassIndex);
-        
-        // parse super class index
-        final int superClassIndex = inStream.readUnsignedShort();
-        superClass = ((superClassIndex != 0) ? (ConstantClass)getConstPool(superClassIndex) : null);
-        
-        // parse interfaces count
-        final int interfacesCount = inStream.readUnsignedShort();
-        
-        // parse interfaces
-        interfaces = new ConstantClass[interfacesCount];
-        for (int i = 0; i < interfacesCount; i++) {
-            final int interfaceIndex = inStream.readUnsignedShort();
-            interfaces[i] = (ConstantClass)getConstPool(interfaceIndex);
-        }
-        
-        // parse fields count
-        final int fieldsCount = inStream.readUnsignedShort();
-        
-        // parse fields
-        fields = new Field[fieldsCount];
-        for (int i = 0; i < fieldsCount; i++) {
-            fields[i] = Field.createField(inStream, this);
-        }
-        
-        // parse methods count
-        final int methodsCount = inStream.readUnsignedShort();
-        
-        // parse methods
-        methods = new Method[methodsCount];
-        for (int i = 0; i < methodsCount; i++) {
-            methods[i] = Method.createMethod(inStream, this);
-        }
-        
-        // parse attributes count
-        final int attributesCount = inStream.readUnsignedShort();
-        
-        // parse attributes
-        attributes = new Attribute[attributesCount];
-        for (int i = 0; i < attributesCount; i++) {
-            attributes[i] = Attribute.createAttribute(inStream, this);
-        }
-        
-        inStream.close();
     }
     
     /**
@@ -578,8 +578,8 @@ public class JavaClassParser implements ConstPoolRetriever
                 String fieldType = field.getType();
                 for (int j = 0; j < field.getAttributesCount(); j++) {
                     final Attribute attr = field.getAttribute(j);
-                    if (attr instanceof SignatureAttribute) {
-                        fieldType = Member.getCompoundTypeFromSignature(((SignatureAttribute)attr).getSignature());
+                    if (attr instanceof SignatureAttribute signatureAttribute) {
+                        fieldType = Member.getCompoundTypeFromSignature(signatureAttribute.getSignature());
                         break;
                     }
                 }
@@ -592,19 +592,16 @@ public class JavaClassParser implements ConstPoolRetriever
                 if (field.isStatic() && field.isFinal()) {
                     for (int j = 0; j < field.getAttributesCount(); j++) {
                         final Attribute attr = field.getAttribute(j);
-                        if (attr instanceof ConstantValueAttribute) {
-                            final Constant c = ((ConstantValueAttribute)attr).getConstantValue();
+                        if (attr instanceof ConstantValueAttribute constantValueAttribute) {
+                            final Constant c = constantValueAttribute.getConstantValue();
                             
-                            if (c instanceof ConstantString) {
-                                writer.append(" = " + unparseString(((ConstantString)c).getString()));
-                            } else if (c instanceof ConstantInteger) {
-                                writer.append(" = " + ((ConstantInteger)c).getValue());
-                            } else if (c instanceof ConstantFloat) {
-                                writer.append(" = " + ((ConstantFloat)c).getValue() + "f");
-                            } else if (c instanceof ConstantLong) {
-                                writer.append(" = " + ((ConstantLong)c).getValue());
-                            } else if (c instanceof ConstantDouble) {
-                                writer.append(" = " + ((ConstantDouble)c).getValue());
+                            switch (c) {
+                                case ConstantString constString -> writer.append(" = " + unparseString(constString.getString()));
+                                case ConstantInteger constInt   -> writer.append(" = " + constInt   .getValue());
+                                case ConstantFloat constFloat   -> writer.append(" = " + constFloat .getValue());
+                                case ConstantLong constLong     -> writer.append(" = " + constLong  .getValue());
+                                case ConstantDouble constDouble -> writer.append(" = " + constDouble.getValue());
+                                default -> {}
                             }
                         }
                     }
@@ -667,18 +664,19 @@ public class JavaClassParser implements ConstPoolRetriever
                     writer.append("strictfp ");
                 }
                 
-                if ("<clinit>".equals(methodName)) {
-                    // method is static field initializer
-                    writer.append(thisClassName);
-                } else if ("<init>".equals(methodName)) {
-                    // method is constructor
-                    writer.append(thisClassName);
-                } else {
-                    // method return type
-                    writer.append(method.getReturnType().replace('/', '.').replace('$', '.') + " ");
-                    
-                    // method identifier
-                    writer.append(method.getName());
+                switch (methodName) {
+                    // <static field initializer>, <constructor>
+                    case "<clinit>", "<init>" -> writer.append(thisClassName);
+
+                    // other methods
+                    case null,
+                    default -> {
+                        // method return type
+                        writer.append(method.getReturnType().replace('/', '.').replace('$', '.') + " ");
+                        
+                        // method identifier
+                        writer.append(method.getName());
+                    }
                 }
                 
                 // method parameters
@@ -723,32 +721,16 @@ public class JavaClassParser implements ConstPoolRetriever
         for (int i = 0; i < input.length(); i++) {
             final char c = input.charAt(i);
             switch (c) {
-                case '\\':
-                    toReturn += "\\\\";
-                    break;
-                case '\'':
-                    toReturn += "\\\'";
-                    break;
-                case '\"':
-                    toReturn += "\\\"";
-                    break;
-                case '\b':
-                    toReturn += "\\b";
-                    break;
-                case '\f':
-                    toReturn += "\\f";
-                    break;
-                case '\n':
-                    toReturn += "\\n";
-                    break;
-                case '\r':
-                    toReturn += "\\r";
-                    break;
-                case '\t':
-                    toReturn += "\\t";
-                    break;
-                default:
-                    if (c >= 0x20 && c <= 0x7e) {
+                case '\\' -> toReturn += "\\\\";
+                case '\'' -> toReturn += "\\\'";
+                case '\"' -> toReturn += "\\\"";
+                case '\b' -> toReturn += "\\b";
+                case '\f' -> toReturn += "\\f";
+                case '\n' -> toReturn += "\\n";
+                case '\r' -> toReturn += "\\r";
+                case '\t' -> toReturn += "\\t";
+                default -> {
+                    if (c >= 0x0020 && c <= 0x007e) {
                         toReturn += c;
                     } else {
                         String strRep = Integer.toString((int)c, 16);
@@ -757,7 +739,7 @@ public class JavaClassParser implements ConstPoolRetriever
                         }
                         toReturn += "\\u" + strRep;
                     }
-                    break;
+                }
             }
         }
         toReturn += "\"";
@@ -808,7 +790,7 @@ public class JavaClassParser implements ConstPoolRetriever
      * with sufficient buffer to avoid overcrowding.
      * 
      * @author Yui Hei Choi
-     * @version 2025.01.10
+     * @version 2025.01.30
      */
     public interface BufferedOutput
     {

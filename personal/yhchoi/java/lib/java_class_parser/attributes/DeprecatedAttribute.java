@@ -1,7 +1,7 @@
 /**
  * 
  *  DeprecatedAttribute.java - A class that holds a Deprecated Attribute in a .class file.
- *  Copyright (C) 2024 YH Choi
+ *  Copyright (C) 2024 - 2025 YH Choi
  *
  *  This program is licensed under BSD 3-Clause License.
  *  See LICENSE.txt for details.
@@ -25,7 +25,7 @@ package personal.yhchoi.java.lib.java_class_parser.attributes;
  * A Deprecated Attribute in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.15
+ * @version 2025.01.30
  */
 public class DeprecatedAttribute extends Attribute
 {

@@ -1,7 +1,7 @@
 /**
  * 
  *  Member.java - A class that holds a member (either field or method) in a .class file.
- *  Copyright (C) 2024 YH Choi
+ *  Copyright (C) 2024 - 2025 YH Choi
  *
  *  This program is licensed under BSD 3-Clause License.
  *  See LICENSE.txt for details.
@@ -34,7 +34,7 @@ import personal.yhchoi.java.lib.java_class_parser.constants.ConstantUTF8;
  * A member (either field or method) in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.15
+ * @version 2025.01.30
  */
 public abstract class Member
 {
@@ -259,52 +259,52 @@ public abstract class Member
         ArrayList<String> types = new ArrayList<>();
         while (!descriptor.isEmpty()) {
             String type = "";
-            boolean sameType = false;
+            boolean sameType;
             do {
                 sameType = false;
                 switch (descriptor.charAt(0)) {
-                    case '[':
+                    case '[' -> {
                         type += "[]";
                         sameType = true;
                         descriptor = descriptor.substring(1);
-                        break;
-                    case 'L':
+                    }
+                    case 'L' -> {
                         final int nextSemicolonIndex = descriptor.indexOf(";");
                         type = descriptor.substring(1, nextSemicolonIndex) + type;
                         descriptor = descriptor.substring(nextSemicolonIndex + 1);
-                        break;
-                    case 'B':
+                    }
+                    case 'B' -> {
                         type = "byte" + type;
                         descriptor = descriptor.substring(1);
-                        break;
-                    case 'C':
+                    }
+                    case 'C' -> {
                         type = "char" + type;
                         descriptor = descriptor.substring(1);
-                        break;
-                    case 'D':
+                    }
+                    case 'D' -> {
                         type = "double" + type;
                         descriptor = descriptor.substring(1);
-                        break;
-                    case 'F':
+                    }
+                    case 'F' -> {
                         type = "float" + type;
                         descriptor = descriptor.substring(1);
-                        break;
-                    case 'I':
+                    }
+                    case 'I' -> {
                         type = "int" + type;
                         descriptor = descriptor.substring(1);
-                        break;
-                    case 'J':
+                    }
+                    case 'J' -> {
                         type = "long" + type;
                         descriptor = descriptor.substring(1);
-                        break;
-                    case 'S':
+                    }
+                    case 'S' -> {
                         type = "short" + type;
                         descriptor = descriptor.substring(1);
-                        break;
-                    case 'Z':
+                    }
+                    case 'Z' -> {
                         type = "boolean" + type;
                         descriptor = descriptor.substring(1);
-                        break;
+                    }
                 }
             } while (sameType);
             // type = type.replace('/', '.');
@@ -347,61 +347,56 @@ public abstract class Member
             boolean endOfOneType = false;
             if (withinClass) {
                 switch (c) {
-                    case '<':
+                    case '<' -> {
                         withinClass = false;
                         toReturn += c;
-                        break;
-                    case ';':
+                    }
+                    case ';' -> {
                         withinClass = false;
                         endOfOneType = true;
-                        break;
-                    default:
-                        toReturn += c;
+                    }
+                    default -> toReturn += c;
                 }
             } else {
                 switch (c) {
-                    case '[':
-                        arrayDepth++;
-                        break;
-                    case 'L':
-                        withinClass = true;
-                        break;
-                    case '>':
+                    case '[' -> arrayDepth++;
+                    case 'L' -> withinClass = true;
+                    case '>' -> {
                         withinClass = true;
                         toReturn += c;
-                        break;
-                    case 'B':
+                    }
+                    case 'B' -> {
                         toReturn += "byte";
                         endOfOneType = true;
-                        break;
-                    case 'C':
+                    }
+                    case 'C' -> {
                         toReturn += "char";
                         endOfOneType = true;
-                        break;
-                    case 'D':
+                    }
+                    case 'D' -> {
                         toReturn += "double";
                         endOfOneType = true;
-                        break;
-                    case 'F':
+                    }
+                    case 'F' -> {
                         toReturn += "float";
                         endOfOneType = true;
-                        break;
-                    case 'I':
+                    }
+                    case 'I' -> {
                         toReturn += "int";
                         endOfOneType = true;
-                        break;
-                    case 'J':
+                    }
+                    case 'J' -> {
                         toReturn += "long";
                         endOfOneType = true;
-                        break;
-                    case 'S':
+                    }
+                    case 'S' -> {
                         toReturn += "short";
                         endOfOneType = true;
-                        break;
-                    case 'Z':
+                    }
+                    case 'Z' -> {
                         toReturn += "boolean";
                         endOfOneType = true;
-                        break;
+                    }
                 }
             }
             if (endOfOneType) {

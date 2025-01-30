@@ -1,7 +1,7 @@
 /**
  * 
  *  ConstantMemberref.java - A class that holds a constant memberref in a .class file.
- *  Copyright (C) 2024 YH Choi
+ *  Copyright (C) 2024 - 2025 YH Choi
  *
  *  This program is licensed under BSD 3-Clause License.
  *  See LICENSE.txt for details.
@@ -29,7 +29,7 @@ import personal.yhchoi.java.lib.java_class_parser.ConstPoolRetriever;
  * Constant memberref in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.15
+ * @version 2025.01.30
  */
 public abstract class ConstantMemberref extends Constant
 {
@@ -84,16 +84,12 @@ public abstract class ConstantMemberref extends Constant
             return null;
         }
         
-        switch (type) {
-            case FIELD:
-                return new ConstantFieldref(consts, classIndex, nameAndTypeIndex);
-            case METHOD:
-                return new ConstantMethodref(consts, classIndex, nameAndTypeIndex);
-            case INTERFACE_METHOD:
-                return new ConstantInterfaceMethodref(consts, classIndex, nameAndTypeIndex);
-            default:
-                return null;
-        }
+        return switch (type) {
+            case FIELD -> new ConstantFieldref(consts, classIndex, nameAndTypeIndex);
+            case METHOD -> new ConstantMethodref(consts, classIndex, nameAndTypeIndex);
+            case INTERFACE_METHOD -> new ConstantInterfaceMethodref(consts, classIndex, nameAndTypeIndex);
+            default -> null;
+        };
     }
     
     /**

@@ -1,7 +1,7 @@
 /**
  * 
  *  Constant.java - A class that holds a constant in the constant pool in a .class file.
- *  Copyright (C) 2024 YH Choi
+ *  Copyright (C) 2024 - 2025 YH Choi
  *
  *  This program is licensed under BSD 3-Clause License.
  *  See LICENSE.txt for details.
@@ -31,7 +31,7 @@ import personal.yhchoi.java.lib.java_class_parser.JavaClassFormatException;
  * A constant in the constant pool of a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.15
+ * @version 2025.01.30
  */
 public abstract class Constant
 {
@@ -39,7 +39,7 @@ public abstract class Constant
      * Const pool tags.
      *
      * @author Yui Hei Choi
-     * @version 2024.12.21
+     * @version 2025.01.30
      */
     protected enum ConstPoolTag
     {
@@ -177,43 +177,25 @@ public abstract class Constant
         if (tag == null) {
             throw new JavaClassFormatException("Const Tag = " + tagNumber + " is not a valid tag.");
         }
-        switch (tag) {
-            case CLASS:
-                return ConstantClass.createActualConst(inStream, consts);
-            case FIELDREF:
-                return ConstantFieldref.createActualConst(inStream, consts);
-            case METHODREF:
-                return ConstantMethodref.createActualConst(inStream, consts);
-            case INTERFACE_METHODREF:
-                return ConstantInterfaceMethodref.createActualConst(inStream, consts);
-            case STRING:
-                return ConstantString.createActualConst(inStream, consts);
-            case INTEGER:
-                return ConstantInteger.createActualConst(inStream, consts);
-            case FLOAT:
-                return ConstantFloat.createActualConst(inStream, consts);
-            case LONG:
-                return ConstantLong.createActualConst(inStream, consts);
-            case DOUBLE:
-                return ConstantDouble.createActualConst(inStream, consts);
-            case NAME_AND_TYPE:
-                return ConstantNameAndType.createActualConst(inStream, consts);
-            case UTF8:
-                return ConstantUTF8.createActualConst(inStream, consts);
-            case METHOD_HANDLE:
-                return ConstantMethodHandle.createActualConst(inStream, consts);
-            case METHOD_TYPE:
-                return ConstantMethodType.createActualConst(inStream, consts);
-            case DYNAMIC:
-                return ConstantDynamic.createActualConst(inStream, consts);
-            case INVOKE_DYNAMIC:
-                return ConstantInvokeDynamic.createActualConst(inStream, consts);
-            case MODULE:
-                return ConstantModule.createActualConst(inStream, consts);
-            case PACKAGE:
-                return ConstantPackage.createActualConst(inStream, consts);
-            default:
-                return null;
-        }
+        return switch (tag) {
+            case CLASS               -> ConstantClass             .createActualConst(inStream, consts);
+            case FIELDREF            -> ConstantFieldref          .createActualConst(inStream, consts);
+            case METHODREF           -> ConstantMethodref         .createActualConst(inStream, consts);
+            case INTERFACE_METHODREF -> ConstantInterfaceMethodref.createActualConst(inStream, consts);
+            case STRING              -> ConstantString            .createActualConst(inStream, consts);
+            case INTEGER             -> ConstantInteger           .createActualConst(inStream, consts);
+            case FLOAT               -> ConstantFloat             .createActualConst(inStream, consts);
+            case LONG                -> ConstantLong              .createActualConst(inStream, consts);
+            case DOUBLE              -> ConstantDouble            .createActualConst(inStream, consts);
+            case NAME_AND_TYPE       -> ConstantNameAndType       .createActualConst(inStream, consts);
+            case UTF8                -> ConstantUTF8              .createActualConst(inStream, consts);
+            case METHOD_HANDLE       -> ConstantMethodHandle      .createActualConst(inStream, consts);
+            case METHOD_TYPE         -> ConstantMethodType        .createActualConst(inStream, consts);
+            case DYNAMIC             -> ConstantDynamic           .createActualConst(inStream, consts);
+            case INVOKE_DYNAMIC      -> ConstantInvokeDynamic     .createActualConst(inStream, consts);
+            case MODULE              -> ConstantModule            .createActualConst(inStream, consts);
+            case PACKAGE             -> ConstantPackage           .createActualConst(inStream, consts);
+            default                  -> null;
+        };
     }
 }

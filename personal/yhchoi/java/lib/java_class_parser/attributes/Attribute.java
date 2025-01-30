@@ -1,7 +1,7 @@
 /**
  * 
  *  Attribute.java - A class that holds an attribute in a .class file.
- *  Copyright (C) 2024 YH Choi
+ *  Copyright (C) 2024 - 2025 YH Choi
  *
  *  This program is licensed under BSD 3-Clause License.
  *  See LICENSE.txt for details.
@@ -33,7 +33,7 @@ import personal.yhchoi.java.lib.java_class_parser.constants.ConstantUTF8;
  * An attribute in a .class file.
  *
  * @author Yui Hei Choi
- * @version 2025.01.15
+ * @version 2025.01.30
  */
 public class Attribute
 {
@@ -49,7 +49,7 @@ public class Attribute
      * Attribute tags.
      *
      * @author Yui Hei Choi
-     * @version 2025.01.10
+     * @version 2025.01.30
      */
     protected enum AttrTag
     {
@@ -208,22 +208,15 @@ public class Attribute
         if (tag == null) {
             return defaultAttribute;
         }
-        switch (tag) {
-            case CONSTANT_VALUE:
-                return ConstantValueAttribute.recoverAttribute(defaultAttribute);
-            case ENCLOSING_METHOD:
-                return EnclosingMethodAttribute.recoverAttribute(defaultAttribute);
-            case SYNTHETIC:
-                return SyntheticAttribute.recoverAttribute(defaultAttribute);
-            case SIGNATURE:
-                return SignatureAttribute.recoverAttribute(defaultAttribute);
-            case SOURCE_FILE:
-                return SourceFileAttribute.recoverAttribute(defaultAttribute);
-            case DEPRECATED:
-                return DeprecatedAttribute.recoverAttribute(defaultAttribute);
-            default:
-                return defaultAttribute;
-        }
+        return switch (tag) {
+            case CONSTANT_VALUE   -> ConstantValueAttribute  .recoverAttribute(defaultAttribute);
+            case ENCLOSING_METHOD -> EnclosingMethodAttribute.recoverAttribute(defaultAttribute);
+            case SYNTHETIC        -> SyntheticAttribute      .recoverAttribute(defaultAttribute);
+            case SIGNATURE        -> SignatureAttribute      .recoverAttribute(defaultAttribute);
+            case SOURCE_FILE      -> SourceFileAttribute     .recoverAttribute(defaultAttribute);
+            case DEPRECATED       -> DeprecatedAttribute     .recoverAttribute(defaultAttribute);
+            default               -> defaultAttribute;
+        };
     }
     
     /**
