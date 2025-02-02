@@ -38,13 +38,19 @@ jobs:
         with:
           name: Package
           path: ./*.jar
-          retention-days: 1
-      - uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ github.ref_name }}"
-          title: "Version ${{ github.ref_name }}"
-          prerelease: false
-          files: |
-            ./LICENSE.txt
-            ./*.jar
+      #     retention-days: 1
+      # - uses: marvinpinto/action-automatic-releases@latest
+      #   with:
+      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #     automatic_release_tag: "${{ github.ref_name }}"
+      #     title: "Version ${{ github.ref_name }}"
+      #     prerelease: false
+      #     files: |
+      #       ./LICENSE.txt
+      #       ./*.jar
+      - name: Uploads asset files to a GitHub Release.
+        run: |
+          gh release upload ${{ github.ref_name }} ./LICENSE.txt ./*.jar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
