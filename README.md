@@ -1,4 +1,7 @@
 # java_class_parser  
+[![GitHub release](https://img.shields.io/github/v/release/YH-Choi-001/java_class_parser.svg)](https://github.com/YH-Choi-001/java_class_parser/releases/latest)  
+![GitHub All Releases](https://img.shields.io/github/downloads/YH-Choi-001/java_class_parser/total.svg?label=downloads)  
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/YH-Choi-001/java_class_parser/latest/main)  
 ## A powerful tool to parse java class files.  
   
 Title: Java Class Parser  
