@@ -523,7 +523,8 @@ public class JavaClassParser implements ConstPoolRetriever
         
         // maybe implements some interfaces
         if (getInterfacesCount() > 0) {
-            writer.append(" implements " + getInterface(0).getName().replace('/', '.').replace('$', '.'));
+            writer.append(isInterface() ? " extends " : " implements "); // interfaces extends other interfaces
+            writer.append(getInterface(0).getName().replace('/', '.').replace('$', '.'));
             for (int i = 1; i < getInterfacesCount(); i++) {
                 writer.append(", " + getInterface(i).getName().replace('/', '.').replace('$', '.'));
             }
@@ -546,6 +547,8 @@ public class JavaClassParser implements ConstPoolRetriever
                     writer.append(field.getName());
                     if (((i + 1) < getFieldsCount()) && getField(i + 1).isEnum()) {
                         writer.append(",");
+                    } else {
+                        writer.append(";");
                     }
                     writer.append("\n");
                     continue;
